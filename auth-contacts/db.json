@@ -1,24 +1,42 @@
 {
-    "contactDeps": [
+  "contactDeps": [
+    {
+      "id": 1,
+      "login": "Alex123",
+      "password": "Alex123123",
+      "contacts": [
         {
-            "login": "123",
-            "password": "123",
-            "contacts": [
-                {
-                    "name": "Алексей Алексеев",
-                    "number": "89122170026"
-                }
-            ]
+          "name": "Алексей Алексеев",
+          "number": "89123123123"
         },
         {
-            "login": "111",
-            "password": "111",
-            "contacts": [
-                {
-                    "name": "Анжелина Гафурова",
-                    "number": "89514825648"
-                }
-            ]
+          "name": "Михаил Михайлов",
+          "number": "89321321321"
+        },
+        {
+          "name": "Елена Еленова",
+          "number": "89333222111"
         }
-    ]
+      ]
+    },
+    {
+      "id": 2,
+      "login": "SamCoolBoy",
+      "password": "SamCoolBoy111",
+      "contacts": [
+        {
+          "name": "Ксюша",
+          "number": "89555444777"
+        },
+        {
+          "name": "Полина",
+          "number": "89000444222"
+        },
+        {
+          "name": "Алина",
+          "number": "89670537540"
+        }
+      ]
+    }
+  ]
 }

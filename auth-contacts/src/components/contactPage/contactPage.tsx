@@ -1,19 +1,19 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import Modal from './modal/modal';
-
-import '../app/app.scss';
+import Search from './search/search';
 
 type Contact = {
-    id: number,
-    login: string,
-    password: string,
+    id?: number,
     name: string,
     number: string
 }
-
+type UserData = {
+    login: string,
+    password: string,
+    id?: number
+}
 type DataState = {
-    contacts: Array<Contact>,
     modalData: Contact,
     modalOpen: boolean,
 }
@@ -21,23 +21,47 @@ type DataState = {
 class ContactPage extends Component {
 
     state: DataState = {
-        contacts: [],
-        modalData: null,
-        modalOpen: false 
+        modalData: {
+            name: '',
+            number: ''
+        },
+        modalOpen: false
     };
 
-    props: any; // поправить
-    
-    componentDidMount(): void {
-        fetch('http://localhost:3001/contactDeps')
-        .then(res => res.json())
-        .then(data => data.find((el: Contact) => 
-        {
-            return el.login == this.props.userInfo.login && el.password == this.props.userInfo.password
-        }))
-        .then((filtered) => this.setState({
-            contacts: filtered.contacts
-        }))
+    props: {
+        contactsInfo: Array<Contact>,
+        filterValue: string,
+        userInfo: UserData,
+        setContacts: (data:Array<Contact>) => void
+    }; 
+
+    componentWillUnmount(): void {
+        this.sendServerData();
+    }
+
+    sendServerData = (): void => {
+        const { id, login, password } = this.props.userInfo;
+        const body: object = {
+            id, 
+            login, 
+            password,
+            contacts: this.props.contactsInfo.map(el => {
+                    return {
+                        name: el.name,
+                        number: el.number
+                    }
+                })
+            
+        }
+        if (id !== undefined) {
+            fetch(`http://localhost:3001/contactDeps/${id}`,{
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8'
+                },
+                body: JSON.stringify(body)
+            })
+        } 
     }
 
     openModal = (data?: Contact): void => {
@@ -47,22 +71,29 @@ class ContactPage extends Component {
         })
     }
 
+    deleteItem = (index: number): void => {
+        this.props.setContacts([
+            ...this.props.contactsInfo.slice(0, index),
+            ...this.props.contactsInfo.slice(index + 1)
+        ])
+    }
+
     changeContact = (e: React.FormEvent<EventTarget>): void => {
         e.preventDefault();
-        const target = e.target as HTMLInputElement;
-        const name: string = target['contactName'].value;
-        const number: string = target['telNum'].value;
 
-        this.setState({
-            contacts: [
-                ...this.state.contacts.slice(0, this.state.modalData.id),
+        if (this.state.modalData.id !== undefined) {
+            const target = e.target as HTMLInputElement;
+            const name: string = target['contactName'].value;
+            const number: string = target['telNum'].value;
+
+            this.props.setContacts([
+                ...this.props.contactsInfo.slice(0, this.state.modalData.id),
                 {
                     id: this.state.modalData.id, name, number
                 },
-                ...this.state.contacts.slice(this.state.modalData.id + 1)
-            ]
-        });
-
+                ...this.props.contactsInfo.slice(this.state.modalData.id + 1),
+            ])
+        }
         this.closeModal();
     }
 
@@ -77,28 +108,47 @@ class ContactPage extends Component {
         const target = e.target as HTMLInputElement;
         const name: string = target['contactName'].value;
         const number: string = target['telNum'].value;
-        this.setState({
-            contacts: [
-                ...this.state.contacts,
+        this.props.setContacts([
+            ...this.props.contactsInfo,
                 {
                     name, number
                 }
-            ]
-        });
+        ])
 
         this.closeModal();
     }
 
-    render() {
+    renderFeatures(contact: Contact, index: number): JSX.Element {
+        return (
+            <div>
+                <button type="button" className="btn btn-outline-primary right-margin" onClick={() => this.openModal({...contact, id: index})}>
+                    <i className="fa fa-pen"></i>
+                </button>
+                
+                <button type="button" key={index} className="btn btn-outline-danger" onClick={() => this.deleteItem(index)}>
+                    <i className="fa fa-trash"></i>
+                </button>
+            </div>
+        )
+    }
+
+    render(): JSX.Element {
+        const { userInfo, contactsInfo, filterValue } = this.props;
+        const contactsSourse = filterValue ? contactsInfo.filter(el => el.name.toLowerCase().includes(filterValue.toLowerCase())) : contactsInfo;
         return (
             <section>
-                <div className='flexbox align-right base-padding'>
-                    {this.props.userInfo.login}<br/>
+                <div className='flexbox align-right base-padding margin-bottom-small'>
+                    {userInfo.login}<br/>
                 </div>
-                <div className='flexbox base-padding margin-bottom-big'>
+                <div className='flexbox align-between base-padding margin-bottom-big'>
+                    <div></div>
                     <h1>Контакты</h1>
-                    <i className="fa fa-plus flexbox align-center" aria-hidden="true" onClick={() => this.openModal()}></i>
+                    <button type="button" className="btn btn-outline-primary" onClick={() => this.openModal()}>
+                        Добавить
+                    </button>
                 </div>
+
+                <Search />
 
                 { this.state.modalOpen ? 
                     <Modal 
@@ -109,16 +159,16 @@ class ContactPage extends Component {
                 }
 
                 <div className='base-padding'>
-                    { this.state.contacts[0] ? this.state.contacts.map((contact, index) => {
-                        return <div className="contact-item" key={index} onClick={() => this.openModal({...contact, id: index})}>
-                            {contact.name}<br/>
-                            {contact.number}
-                        </div>
-                    }) : <></>
-                    }
+                    { 
+                        contactsSourse.map((contact, index) => {
+                            return <div className="flexbox align-between contact-item" key={index}>
+                                {contact.name}<br/>
+                                {contact.number}
+                                {this.renderFeatures(contact, index)}
+                            </div>  
+                    })}
                 </div>     
             </section>
-            
         )
     }
 }
@@ -127,4 +177,11 @@ const mapStateToProps = (state: object) => {
     return state;
 }
 
-export default connect(mapStateToProps)(ContactPage)
+const mapDispatchToProps = (dispatch) => {
+    return {
+      setContacts: (data: Array<Contact>) => {
+        dispatch({ type: "SET_CONTACTS", payload: data })
+      }
+    }
+}
+export default connect(mapStateToProps, mapDispatchToProps)(ContactPage)

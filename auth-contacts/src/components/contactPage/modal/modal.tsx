@@ -1,37 +1,39 @@
 import React, { Component } from 'react';
 
+type Contact = {
+    id?: number,
+    name: string,
+    number: string
+}
 
 export default class Modal extends Component {
-
-    props: any; // поправить
+    props: {
+        addContact: (e: React.FormEvent<EventTarget>) => void,
+        changeContact:(e: React.FormEvent<EventTarget>) => void,
+        closeModal: () => void,
+        modalData: Contact
+    }
 
     render() {
         return (
-            <>
-                <div className="modal">
-                <form className="modal-dialog" onSubmit={(e) => {
-                        this.props.modalData ? this.props.changeContact(e) : this.props.addContact(e)
-                    }}>
-                    <div className="modal-content">
-                    <div className="modal-header">
-                        <h5 className="modal-title">Добавление контакта</h5>
-                        <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div className="modal-body">
-                        <input type="text" name="contactName" placeholder='Имя' defaultValue={this.props.modalData?.name} required></input>
-                        <input type="tel" name="telNum" placeholder='Номер телефона' defaultValue={this.props.modalData?.number} required></input>
-                    </div>
-                    <div className="modal-footer">
-                        <button type="button" className="btn btn-secondary" data-bs-dismiss="modal" 
-                            onClick={() => this.props.closeModal()}>Отменить</button>
-
-                        <button type="submit" className="btn btn-primary">{this.props.modalData ? 'Изменить' : 'Добавить'}</button>
-                    </div>
-                    </div>
-                </form>
+                <div className="flexbox align-center absolute">
+                    <form className="flexbox align-center form-contain" onSubmit={(e) => {
+                            this.props.modalData ? this.props.changeContact(e) : this.props.addContact(e)
+                        }}>
+                        <div>
+                            <h5 className="margin-bottom-big">{this.props.modalData ? 'Изменение' : 'Добавление'} контакта</h5>
+                            <div className="flexbox align-around margin-bottom-small">
+                                <input type="text" name="contactName" placeholder='Имя' defaultValue={this.props.modalData?.name} className='right-margin' required></input>
+                                <input type="tel" name="telNum" placeholder='Номер телефона' defaultValue={this.props.modalData?.number} required></input>
+                            </div>
+                            <div className="flexbox align-around">
+                                <button type="submit" className="btn btn-primary">Готово</button>
+                                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal" 
+                                    onClick={() => this.props.closeModal()}>Отменить</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
-            </>
-            
-        )
+                )
     }
 }
