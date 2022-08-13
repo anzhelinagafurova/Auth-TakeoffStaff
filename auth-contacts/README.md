@@ -1,6 +1,6 @@
 Node version: v16.13.0
 
-Шаг 1. Для установки пакетов запускаем команду:
+Шаг 1. Для установки пакетов в директории Auth-TakeoffStaff\auth-contacts запускаем команду:
 
 ### `npm install`
 
@@ -8,7 +8,7 @@ Node version: v16.13.0
 
 ### `json-server --watch db.json --port 3001`
 
-Шаг 3. Далее с помощью команды в директории Auth-TakeoffStaff\auth-contacts нужно запустить команду:
+Шаг 3. Далее с помощью команды нужно запустить команду:
 
 ### `npm start`
 
